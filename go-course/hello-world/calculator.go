@@ -2,10 +2,6 @@ package main
 
 import "fmt"
 
-func main() {
-	calculator();
-}
-
 func calculator() {
 	var a, b int;
 	var operator string;
