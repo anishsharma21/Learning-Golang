@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func lesson3() {
 	const a int = 3;
 	const b int = 10;
 	add := a + b;
