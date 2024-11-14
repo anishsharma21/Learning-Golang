@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func celsiusToFahr() {
     var cel float64;
     fmt.Print("Temperature in C˚: ");
     fmt.Scan(&cel);
