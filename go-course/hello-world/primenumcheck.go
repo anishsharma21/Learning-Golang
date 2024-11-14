@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func main() {
+func primecheck() {
 	var num int;
 
 	fmt.Print("Number to check: ");
