@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func dangerousop() {
 	fmt.Println("Calling dangerous operation...");
 	dangerousOperation();
 	fmt.Println("Program recovers and continues to proceed.");
