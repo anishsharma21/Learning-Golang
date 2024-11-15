@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func averagecalc() {
 	values := []float64{1, 2, 3}; // better to use fixed array, rather than slice though
 	valuesArr := [4]float64{1, 2, 3, 0};
 	var userValue float64;
