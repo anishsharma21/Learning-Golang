@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func simplechannels() {
 	ch := make(chan int)
 
 	go sendData(ch);
