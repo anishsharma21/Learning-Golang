@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func newmake() {
 	numP := new(int);
 	*numP = 3;
 	fmt.Println("Pointer to new int:", numP, "| Value of new int:", *numP);
