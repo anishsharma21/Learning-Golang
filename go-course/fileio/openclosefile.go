@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func main() {
+func opencloseremovefile() {
 	file, err := os.Create("example.txt");
 	if err != nil {
 		fmt.Println("Error:", err);
