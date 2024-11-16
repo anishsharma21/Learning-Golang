@@ -7,7 +7,7 @@ type Car struct {
 	MaxSpeed float64
 }
 
-func main() {
+func carpointergo() {
 	car := Car{
 		Brand: "Toyota",
 		MaxSpeed: 234,
