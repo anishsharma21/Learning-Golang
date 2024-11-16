@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func main() {
+func fileinfostats() {
 	filename := "go.mod";
 	fileInfo, err := os.Stat(filename);
 	if err != nil {
