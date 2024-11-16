@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func multichannel() {
 	ch1 := make(chan string);
 	ch2 := make(chan string);
 
