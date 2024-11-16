@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func main() {
+func syncinggoroutines() {
 	var wg sync.WaitGroup;
 
 	for i := 1; i <= 3; i++ {
