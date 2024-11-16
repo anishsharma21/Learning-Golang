@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func main() {
+func simplegoroutine() {
 	var wg sync.WaitGroup;
 	wg.Add(1)
 
