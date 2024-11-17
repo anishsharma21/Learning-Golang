@@ -37,13 +37,13 @@ func main() {
 		case "a":
 			err := addTask()
 			if err != nil {
-				fmt.Println("\033[31mError:", err)
+				fmt.Println("\n\033[31mError:", err)
 				fmt.Print("\033[0m")
 			}
 		case "d":
 			err := deleteTask()
 			if err != nil {
-				fmt.Println("\033[31mError:", err)
+				fmt.Println("\n\033[31mError:", err)
 				fmt.Print("\033[0m")
 			}
 		case "x":
@@ -76,12 +76,20 @@ func addTask() error {
 		fmt.Println("Error while reading from stdin:", err)
 		return errors.New("could not create task")
 	}
+	if len(description) <= 1 {
+		return errors.New("task description cannot be empty")
+	}
 	newtask := Task{ Id: generateId(), Description: description }
 	taskList.Tasks = append(taskList.Tasks, newtask)
+	fmt.Println("\n\033[32mTask successfully added!\033[0m");
+	viewTaskList();
 	return nil
 }
 
 func deleteTask() error {
+	if len(taskList.Tasks) == 0 {
+		return errors.New("task list is empty")
+	}
 	var taskid int
 
 	fmt.Print("Task's ID: ")
