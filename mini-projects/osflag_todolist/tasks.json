@@ -1,1 +1,9 @@
-[]
+[
+    {
+        "id": 1,
+        "description": "Walk the dog",
+        "priority": "medium",
+        "dueDate": "2024-11-19T00:00:00Z",
+        "status": "pending"
+    }
+]

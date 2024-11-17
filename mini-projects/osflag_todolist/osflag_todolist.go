@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -8,22 +9,20 @@ import (
 )
 
 type Task struct {
-	id int
-	description string
-	priority string
-	dueDate time.Time
-	status string
+	ID int `json:"id"`
+	Description string `json:"description"`
+	Priority string `json:"priority"`
+	DueDate time.Time `json:"dueDate"`
+	Status string `json:"status"`
 }
 
-type TaskList struct {
-	tasks []Task
-}
+type TaskList []Task
 
 const filename string = "tasks.json"
 var taskList TaskList = TaskList{}
-var commands = [5]string{ "add", "view", "remove", "edit", "help" }
 
 func main() {
+	// check if file exists, create if it doesn't
 	if !fileExists() {
 		fmt.Println("tasks.json does not exist...")
 		err := createFile()
@@ -33,46 +32,61 @@ func main() {
 		}
 		fmt.Println("tasks.json file created!")
 	}
-	err := parseArgs(os.Args)
+
+	// load in data
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&taskList); err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println(taskList)
+
+	// parse and handle args
+	err = parseArgs(os.Args)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
 }
 
 func parseArgs(args []string) error {
-	// check for invalid command
-	var validOperation bool = false
-	for _, cmd := range commands {
-		if args[1] == cmd {
-			validOperation = true
-			break
-		}
+	if len(os.Args) <= 1 {
+		return fmt.Errorf("no arguments provided")
 	}
-	if !validOperation {
-		return fmt.Errorf("Invalid operation: %s", args[1])
-	}
-	// TODO should use a switch statement instead
+	// TODO complete switch statement to handle all commands
 	switch args[1] {
-	case "add":
-		handleAdd(args)
-	case "view":
-		handleView(args)
-	case "remove":
-		handleRemove(args)
-	case "edit":
-		handleEdit(args)
+	// case "add":
+	// 	err := handleAdd(args)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// case "view":
+	// 	handleView(args)
+	// case "complete":
+	// 	handleComplete(args)
+	// case "remove":
+	// 	handleRemove(args)
+	// case "edit":
+	// 	handleEdit(args)
 	case "help":
 		err := handleHelp(args)
 		if err != nil {
 			return err
 		}
+	default:
+		return fmt.Errorf("invalid operation \"%s\"", args[1])
 	}
 
 	return nil
 }
 
 func handleHelp(args []string) error {
-	// check if generic help required
 	if len(args) != 2 || args[1] == "help" {
 		return errors.New("invalid arguments for help")
 	}
