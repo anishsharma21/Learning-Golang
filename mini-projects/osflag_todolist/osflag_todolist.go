@@ -18,6 +18,7 @@ type Task struct {
 
 type TaskList []Task
 
+var incr_id int = 0
 const filename string = "tasks.json"
 var taskList TaskList = TaskList{}
 
@@ -46,12 +47,11 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	fmt.Println(taskList)
 
 	// parse and handle args
 	err = parseArgs(os.Args)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Parsing error:", err)
 	}
 }
 
@@ -59,13 +59,14 @@ func parseArgs(args []string) error {
 	if len(os.Args) <= 1 {
 		return fmt.Errorf("no arguments provided")
 	}
+
 	// TODO complete switch statement to handle all commands
 	switch args[1] {
-	// case "add":
-	// 	err := handleAdd(args)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+	case "add":
+		err := handleAdd(args)
+		if err != nil {
+			return err
+		}
 	// case "view":
 	// 	handleView(args)
 	// case "complete":
@@ -86,8 +87,45 @@ func parseArgs(args []string) error {
 	return nil
 }
 
+func handleAdd(args []string) error {
+	// written for happy case (ideal case where format is correct)
+	var description, priority string
+	var due_date time.Time
+
+	if len(args) >= 3 {
+		description = args[2]
+	}
+
+	for i := 5; i <= len(args) && i <= 7; i += 2 {
+		err := parseAddFlag(3, args, &priority, &due_date)
+		if err != nil {
+			return err
+		}
+	}
+
+	newTask := Task{ ID: generateId(), Description: description, Priority: priority, DueDate: due_date, Status: "pending" }
+	taskList = append(taskList, newTask)
+	return nil
+}
+
+func parseAddFlag(flagIndex int, args []string, priority *string, due_date *time.Time) error {
+	if args[flagIndex] == "-priority" {
+		if args[flagIndex] != "low" && args[flagIndex] != "medium" && args[flagIndex] != "high" {
+			return fmt.Errorf("invalid status \"%s\"", args[flagIndex + 1])
+		}
+		*priority = args[flagIndex + 1]
+	} else if args[flagIndex] == "-due_date" {
+		var err error
+		*due_date, err = time.Parse("2006-01-02", args[flagIndex + 1])	
+		if err != nil {
+			return fmt.Errorf("invalid date format \"%s\", expected YYYY-MM-DD", args[flagIndex + 1])
+		}
+	}
+	return nil
+}
+
 func handleHelp(args []string) error {
-	if len(args) != 2 || args[1] == "help" {
+	if len(args) != 2 || args[1] != "help" {
 		return errors.New("invalid arguments for help")
 	}
 
@@ -119,4 +157,9 @@ func fileExists() bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func generateId() int {
+	incr_id += 1
+	return incr_id
 }
