@@ -107,6 +107,9 @@ func handleAdd(args []string) error {
 
 	newTask := Task{ ID: generateId(), Description: description, Priority: priority, DueDate: due_date, Status: "pending" }
 	taskList = append(taskList, newTask)
+
+	// still need to marshal it and overwrite the json file
+
 	return nil
 }
 

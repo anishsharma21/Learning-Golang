@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-func main() {
-	echo1()
-	echo2()
-}
-
 func echo1() {
 	start := time.Now().UnixMicro()
 	var s, sep string
