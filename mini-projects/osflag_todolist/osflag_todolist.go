@@ -88,7 +88,7 @@ func parseArgs(args []string) error {
 }
 
 func handleAdd(args []string) error {
-	// written for happy case (ideal case where format is correct)
+	// TODO consider unhappy case too
 	var description, priority string
 	var due_date time.Time
 
@@ -103,6 +103,8 @@ func handleAdd(args []string) error {
 		}
 	}
 
+	fmt.Println(description, priority, due_date)
+
 	newTask := Task{ ID: generateId(), Description: description, Priority: priority, DueDate: due_date, Status: "pending" }
 	taskList = append(taskList, newTask)
 	return nil
@@ -110,7 +112,7 @@ func handleAdd(args []string) error {
 
 func parseAddFlag(flagIndex int, args []string, priority *string, due_date *time.Time) error {
 	if args[flagIndex] == "-priority" {
-		if args[flagIndex] != "low" && args[flagIndex] != "medium" && args[flagIndex] != "high" {
+		if args[flagIndex + 1] != "low" && args[flagIndex + 1] != "medium" && args[flagIndex + 1] != "high" {
 			return fmt.Errorf("invalid status \"%s\"", args[flagIndex + 1])
 		}
 		*priority = args[flagIndex + 1]
