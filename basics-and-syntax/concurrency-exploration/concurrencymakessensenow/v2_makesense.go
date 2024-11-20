@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func main() {
+func v2() {
 	var wg sync.WaitGroup
 
 	// OLD code beneath showing just 1 goroutine
