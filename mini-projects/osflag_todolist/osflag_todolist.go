@@ -94,6 +94,9 @@ func handleAdd(args []string) error {
 
 	if len(args) >= 3 {
 		description = args[2]
+		if description != "" {
+			fmt.Println("Description:", description)
+		}
 	}
 
 	for i := 5; i <= len(args) && i <= 7; i += 2 {
@@ -101,14 +104,20 @@ func handleAdd(args []string) error {
 		if err != nil {
 			return err
 		}
+		if priority != "" {
+			fmt.Println("Priority:", priority)
+		}
+		if !due_date.IsZero() {
+			fmt.Println("Due date:", due_date)
+		} else {
+			fmt.Println("Due date (error):", due_date)
+		}
 	}
-
-	fmt.Println(description, priority, due_date)
 
 	newTask := Task{ ID: generateId(), Description: description, Priority: priority, DueDate: due_date, Status: "pending" }
 	taskList = append(taskList, newTask)
 
-	// still need to marshal it and overwrite the json file
+	// TODO still need to marshal it and overwrite the json file
 
 	return nil
 }
@@ -120,6 +129,8 @@ func parseAddFlag(flagIndex int, args []string, priority *string, due_date *time
 		}
 		*priority = args[flagIndex + 1]
 	} else if args[flagIndex] == "-due_date" {
+		// FIXME not finding the -due_date correctly
+		fmt.Println(args[flagIndex])
 		var err error
 		*due_date, err = time.Parse("2006-01-02", args[flagIndex + 1])	
 		if err != nil {
