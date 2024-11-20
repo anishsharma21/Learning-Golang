@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -18,20 +19,24 @@ func printall() {
 }
 
 func printall_c() {
+	var wg sync.WaitGroup
 	ch := make(chan string)
+
 	for i := 0; i < 5; i++ {
+		wg.Add(1)
 		go func(i int) {
+			defer wg.Done()
 			time.Sleep(time.Second)
 			ch <- fmt.Sprintf("Line %d\n", i+1)
 		}(i)
 	}
 
 	go func() {
-		for i := 0; i < 5; i++ {
-			fmt.Print(<-ch)
-		}
-		close(ch)
-	}()
+        wg.Wait()
+        close(ch)
+    }()
 
-	time.Sleep(time.Second * 2)
+	for msg := range ch {
+		fmt.Print(msg)
+	}
 }
