@@ -6,42 +6,46 @@ import (
 )
 
 func main() {
-	c := make(chan string)
+	ch1 := make(chan string)
 	var firstWg sync.WaitGroup
+
 	firstWg.Add(1)
-
-	go countV3(-1, c, &firstWg)
 	go func() {
-		for res := range c {
-			fmt.Print(res)
-		}
+		countV3(0, ch1, &firstWg)
+		close(ch1)
 	}()
 
-	firstWg.Wait()
-	fmt.Printf("First wait group finished!\n\n")
-
-	// now lets try with 5 goroutines
-	var wg sync.WaitGroup
-	for i := 1; i <= 5; i++ {
-		wg.Add(1)
-		go countV3(i, c, &wg)
-	}
-
-	go func() {
-		wg.Wait()
-		close(c)
-	}()
-
-	for res := range c {
+	for res := range ch1 {
 		fmt.Print(res)
 	}
+
+	fmt.Println("First wait group done!")
+
+	ch2 := make(chan string)
+	var secondWg sync.WaitGroup
+
+	for i := 1; i <= 5; i++ {
+		secondWg.Add(1)
+		go countV3(i, ch2, &secondWg)
+	}
+
+	go func() {
+		secondWg.Wait()
+		close(ch2)
+	}()
+
+	for res := range ch2 {
+		fmt.Print(res)
+	}
+
+	fmt.Println("Second wait group done!")
 }
 
 func countV3(grId int, c chan<- string, pWg *sync.WaitGroup) {
+	if pWg != nil {
+		defer pWg.Done()
+	}
 	for i := 1; i <= 5; i++ {
 		c <- fmt.Sprintf("Goroutine %d: %d\n", grId, i)
-	}
-	if pWg != nil {
-		pWg.Done()
 	}
 }
