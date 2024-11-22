@@ -7,7 +7,80 @@ import (
 )
 
 func main() {
-	sixth_test()
+	eleventh_test()
+}
+
+func eleventh_test() {
+	done := make(chan bool)
+
+	go worker_eighth_test(done)
+	go worker_eleventh_test(done)
+
+	// in this one, only 1 goroutine sends result back
+	// because there is only 1 channel receive
+	<-done
+	fmt.Println("Main function exits")
+}
+
+func worker_eleventh_test(ch chan bool) {
+	fmt.Println("Doing work in 11th test worker...")
+	time.Sleep(2 * time.Second)
+	fmt.Println("Done work in 11th test worker!")
+	ch <- true
+}
+
+func tenth_test() {
+	// same as ninth test but no buffered channel
+	done := make(chan bool)
+
+	go worker_eighth_test(done)
+	go worker_eighth_test(done)
+
+	// works the same since both below are also blocking
+	<-done
+	<-done
+	fmt.Println("Main function exits")
+}
+
+func ninth_test() {
+	done := make(chan bool, 2)
+
+	go worker_eighth_test(done)
+	go worker_eighth_test(done)
+
+	// both are blocking because buffered channel is full
+	<-done
+	<-done
+	fmt.Println("Main function exits")
+}
+
+func eighth_test() {
+	// synchronising goroutines with channels where goroutine does work
+	done := make(chan bool)
+
+	go worker_eighth_test(done)
+	// blocked until channel receives done
+	<-done
+	fmt.Println("Main function exits")
+}
+
+func worker_eighth_test(done chan bool) {
+	fmt.Println("Doing work...")
+	time.Sleep(2 * time.Second)
+	fmt.Println("Done work!")
+	done <- true
+}
+
+func seventh_test() {
+	// buffered channels can hold values and don't block while its not full
+	// so they don't need immediate receiving
+	ch := make(chan int, 2)
+
+	ch <- 1
+	ch <- 2
+
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
 }
 
 func sixth_test() {
