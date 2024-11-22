@@ -7,7 +7,17 @@ import (
 )
 
 func main() {
-	third_test()
+	fourth_test()
+}
+
+func fourth_test() {
+	for i := 1 ; i <= 10; i++ {
+		go func() {
+			fmt.Println(i*i)
+			fmt.Println("Number of goroutines:", runtime.NumGoroutine())
+		}()
+	}
+	time.Sleep(2 * time.Second)
 }
 
 func third_test() {
