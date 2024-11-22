@@ -7,7 +7,37 @@ import (
 )
 
 func main() {
-	eleventh_test()
+	channels_exercise2()
+}
+
+func channels_exercise2() {
+	ch := make(chan int, 3)
+
+	for i := 0; i < cap(ch); i++ {
+		ch <- i + 1
+		fmt.Println("Number of items in buffered channel:", len(ch))
+	}
+	close(ch)
+
+	for val := range ch {
+		fmt.Println(val)
+		fmt.Println("Number of items in buffered channel:", len(ch))
+	}
+
+	// for i := 0; i < cap(ch); i++ {
+	// 	fmt.Println(<-ch)
+	// 	fmt.Println("Number of items in buffered channel:", len(ch))
+	// }
+}
+
+func channels_exercise1() {
+	ch := make(chan string)
+
+	go func() {
+		ch <- "message from goroutine"
+	}()
+
+	fmt.Println(<-ch)
 }
 
 func eleventh_test() {
