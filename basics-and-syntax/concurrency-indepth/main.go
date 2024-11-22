@@ -7,7 +7,20 @@ import (
 )
 
 func main() {
-	fifth_test()
+	sixth_test()
+}
+
+func sixth_test() {
+	ch := make(chan string)
+
+	go worker_sixth_test(ch)
+
+	output := <-ch
+	fmt.Println("Worker output:", output)
+}
+
+func worker_sixth_test(ch chan string) {
+	ch <- "message from the worker"
 }
 
 func fifth_test() {
