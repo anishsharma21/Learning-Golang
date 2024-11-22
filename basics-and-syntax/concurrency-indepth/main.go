@@ -2,11 +2,32 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 )
 
 func main() {
-	second_test()
+	third_test()
+}
+
+func third_test() {
+	// printing the number of goroutines running at any given moment
+	go displayNumberOfGoroutines()
+	go printLettersWithDelay()
+	go printLettersWithDelay()
+	go printNumbersWithDelay()
+	go printNumbersWithDelay()
+
+	time.Sleep(2 * time.Second)
+	fmt.Println("Done!")
+}
+
+func displayNumberOfGoroutines() {
+	for {
+		fmt.Println("Number of Goroutines:", runtime.NumGoroutine())
+		fmt.Println("Number of CPU cores avalable:", runtime.NumCPU())
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func second_test() {
@@ -19,14 +40,14 @@ func second_test() {
 }
 
 func printNumbersWithDelay() {
-	for i := 0; i < 10; i++ {
+	for i := 0;; i++ {
 		fmt.Println(i)
 		time.Sleep(100 * time.Millisecond)
 	}
 }
 
 func printLettersWithDelay() {
-	for ch := 'a'; ch < 'e'; ch++ {
+	for ch := 'a';; ch++ {
 		fmt.Printf("%c\n", ch)
 		time.Sleep(150 * time.Millisecond)
 	}
