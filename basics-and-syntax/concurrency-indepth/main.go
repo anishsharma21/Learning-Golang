@@ -7,7 +7,22 @@ import (
 )
 
 func main() {
-	fourth_test()
+	fifth_test()
+}
+
+func fifth_test() {
+	ch := make(chan int)
+
+	go func() {
+		// sending blocks until main goroutine ready to receive
+		ch <- 21
+		// which means this line below may not always get called
+		fmt.Println("Sending '21' into the channel")
+	}()
+
+	// receiving blocks until goroutine sends value into channel
+	value := <-ch
+	fmt.Println("Received value:", value)
 }
 
 func fourth_test() {
