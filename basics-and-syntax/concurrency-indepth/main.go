@@ -7,9 +7,46 @@ import (
 )
 
 func main() {
-	dup_channels_exercise4()
+	bufchannel_jobqueue()
 }
 
+func bufchannel_jobqueue() {
+	jobs := make(chan int, 3)
+	done := make(chan bool, 3)
+
+	for range 3 {
+		go bufchannel_jobqueue_worker(jobs, done)
+	}
+
+	start := time.Now()
+	const numjobs int = 5
+
+	for i := 0; i < numjobs; i++ {
+		jobs <- i+1
+	}
+	close(jobs)
+
+	for range numjobs {
+		<-done
+	}
+	close(done)
+
+	fmt.Printf("%.3fs elapsed\n", time.Since(start).Seconds())
+	fmt.Println("All jobs complete")
+}
+
+func bufchannel_jobqueue_worker(jobs <-chan int, done chan<- bool) {
+	for job := range jobs {
+		fmt.Println("Processing job:", job)
+		time.Sleep(time.Second)
+		done <- true
+	}
+}
+
+// btw, unbuffered channels block because they can't receive anything else until they are emptied
+// by blocking, they allow goroutine to empty that single unbuffered channel
+// buffered channels don't fill immediately, so they don't always block
+// but when buffered channels are filled, they end up blocking the same way as unbuffered channels
 func dup_channels_exercise4() {
 	// fan-out pattern
 	jobs := make(chan int)
