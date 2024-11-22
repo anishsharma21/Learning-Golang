@@ -7,7 +7,72 @@ import (
 )
 
 func main() {
-	channels_exercise2()
+	dup_channels_exercise4()
+}
+
+func dup_channels_exercise4() {
+	// fan-out pattern
+	jobs := make(chan int)
+	done := make(chan bool)
+
+	for range 3 {
+		go dup_worker_channels_exercise4(jobs, done)
+	}
+
+	for i := 0; i < 3; i++ {
+		jobs <- i+1
+	}
+	close(jobs)
+
+	for range 3 {
+		<-done
+	}
+}
+
+func dup_worker_channels_exercise4(jobs <-chan int, done chan<- bool) {
+	for job := range jobs {
+		fmt.Println("Doing work...")
+		time.Sleep(1 * time.Second)
+		fmt.Printf("Job %d done!\n", job)
+	}
+	done <- true
+}
+
+func channels_exercise4() {
+	// fan-out pattern
+	jobs := make(chan int)
+
+	for i := 0; i < 3; i++ {
+		go worker_channels_exercise4(jobs)
+	}
+
+	for i := 0; i < 3; i++ {
+		jobs <- i+1
+	}
+	close(jobs)
+
+	time.Sleep(4 * time.Second)
+}
+
+func worker_channels_exercise4(jobs <-chan int) {
+	for job := range jobs {
+		fmt.Println("Doing work...")
+		time.Sleep(1 * time.Second)
+		fmt.Printf("Job %d done!\n", job)
+	}
+}
+
+func channels_exercise3() {
+	// deliberate deadlock creation and commented out solution
+	ch := make(chan int)
+
+	ch <- 1
+
+	// go func() {
+	// 	ch <- 1
+	// }()
+
+	fmt.Println("This line is not reached... channel send is blocking")
 }
 
 func channels_exercise2() {
