@@ -3,24 +3,96 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 )
 
 func main() {
-	fmt.Println("Unbuffered channel")
-	bufchannel_exercise4(0)
+	multidirchannel_main()
+}
 
-	fmt.Println("Buffered channel")
-	bufchannel_exercise4(10)
+//practice with directional channels and the producer-consumer pattern
+func multidirchannel_main() {
+	jobs := make(chan int)
+	results := make(chan int)
+	jobsArr := make([]int, 100)
+	for i := 0; i < 100; i++ {
+		jobsArr[i] = i+1
+	}
 
-	fmt.Println("Buffered channel")
-	bufchannel_exercise4(100)
+	go multidirchannel_producer(jobsArr, jobs)
 
-	fmt.Println("Buffered channel")
-	bufchannel_exercise4(1000)
+	var wg sync.WaitGroup
+	for range 2 {
+		wg.Add(1)
+		go multidirchannel_consumer(results, jobs, &wg)
+	}
 
-	fmt.Println("Buffered channel")
-	bufchannel_exercise4(10000)
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	multidirchannel_printer(results)
+	fmt.Println("Done!")
+}
+
+// since I am only using 1 producer and consumer, its fine to close inside the goroutines
+func multidirchannel_producer(numberOfJobs []int, out chan<- int) {
+	for i := 0; i < len(numberOfJobs) ; i++ {
+		out <- i+1
+	}
+	close(out)
+}
+
+func multidirchannel_consumer(out chan<- int, in <-chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for val := range in {
+		out <- val * val
+	}
+}
+
+func multidirchannel_printer(in <- chan int) {
+	for val := range in {
+		fmt.Println("Result:", val)
+	}
+}
+
+//practice with directional channels and the producer-consumer pattern
+func dirchannel_main() {
+	jobs := make(chan int)
+	results := make(chan int)
+	jobsArr := make([]int, 100)
+	for i := 0; i < 100; i++ {
+		jobsArr[i] = i+1
+	}
+
+	go dirchannel_producer(jobsArr, jobs)
+	go dirchannel_consumer(results, jobs)
+
+	dirchannel_printer(results)
+	fmt.Println("Done!")
+}
+
+// since I am only using 1 producer and consumer, its fine to close inside the goroutines
+func dirchannel_producer(numberOfJobs []int, out chan<- int) {
+	for i := 0; i < len(numberOfJobs) ; i++ {
+		out <- i+1
+	}
+	close(out)
+}
+
+func dirchannel_consumer(out chan<- int, in <-chan int) {
+	for val := range in {
+		out <- val * val
+	}
+	close(out)
+}
+
+func dirchannel_printer(in <- chan int) {
+	for val := range in {
+		fmt.Println("Result:", val)
+	}
 }
 
 // producer-consumer job queue exercise
