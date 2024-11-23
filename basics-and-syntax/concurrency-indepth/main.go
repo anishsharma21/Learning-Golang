@@ -9,7 +9,51 @@ import (
 )
 
 func main() {
-	select_exercise2()
+	select_exercise3()
+}
+
+func select_exercise3() {
+	ch1 := make(chan int)
+	ch2 := make(chan int)
+	out := simple_select_multiplex(ch1, ch2)
+
+	go func() {
+		ch1 <- 1
+		close(ch1)
+		ch2 <- 2
+		close(ch2)
+	}()
+
+	for result := range out {
+		fmt.Println(result)
+	}
+}
+
+func simple_select_multiplex(ch1 <-chan int, ch2 <-chan int) <-chan int {
+	out := make(chan int)
+	go func() {
+		for {
+			select {
+			case v, ok := <-ch1:
+				if ok {
+					out <- v
+				} else {
+					ch1 = nil
+				}
+			case v, ok := <-ch2:
+				if ok {
+					out <- v
+				} else {
+					ch2 = nil
+				}
+			}
+			if ch1 == nil && ch2 == nil {
+				close(out)
+				return
+			}
+		}
+	}()
+	return out
 }
 
 // select with a timeout case
