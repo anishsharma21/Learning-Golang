@@ -9,10 +9,49 @@ import (
 )
 
 func main() {
-	dynamic_pipeline(5, 5)
+	select_exercise2()
 }
 
-var numberOfFinalValues int = 0
+// select with a timeout case
+func select_exercise2() {
+	ch := make(chan int)
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		ch <- 55
+	}()
+
+	select {
+	case v := <-ch:
+		fmt.Println("Received value:", v)
+	case <-time.After(1 * time.Second):
+		fmt.Println("Timeout!")
+	}
+}
+
+// simple select statement to choose between values from 2 channels, checks both
+// no default case so that it is blocking
+func select_exercise1() {
+	ch1 := make(chan int)
+	ch2 := make(chan int)
+
+	go func() {
+		ch1 <- 1
+	}()
+
+	go func() {
+		ch2 <- 1
+	}()
+
+	for range 2 {
+		select {
+		case v := <-ch1:
+			fmt.Println("Channel 1 value:", v)
+		case v := <-ch2:
+			fmt.Println("Channel 2 value:", v)
+		}
+	}
+}
 
 func dynamic_pipeline(filterWorkerNum int, squareWorkerNum int) {
 	start := time.Now()
@@ -51,7 +90,6 @@ func dynamic_pipeline(filterWorkerNum int, squareWorkerNum int) {
 	}
 
 	fmt.Printf("Completed in %dµs\n", time.Since(start).Microseconds())
-	fmt.Printf("Number of final values: %d\n", numberOfFinalValues)
 }
 
 func produceValues(out chan<- int) {
@@ -73,7 +111,6 @@ func filterValues(in <-chan int, out chan<- int, wg *sync.WaitGroup) {
 func squareValues(in <-chan int, out chan<- int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for val := range in {
-		numberOfFinalValues++
 		out <- val * val
 	}
 }
