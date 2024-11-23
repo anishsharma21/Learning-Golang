@@ -7,6 +7,40 @@ import (
 )
 
 func main() {
+	bufchannel_exercise2()
+}
+
+// handling buffered channel overflow
+// nothing happens and goroutine exits, unless we don't use goroutine
+// in that case, direct ch <- call will block on third attempt forever, causing deadlock
+// can be fixed by processing values out of the channel as they arrive, making space in chan
+func bufchannel_exercise2() {
+	ch := make(chan int, 2)
+
+	go func() {
+		for i := 0; i < 3; i++ {
+			ch <- i+1
+		}
+	}()
+
+	// for range 3 {
+	// 	fmt.Println("Job complete:", <-ch)
+	// }
+}
+
+// simple buffered channel, sends 3 values, receiver blocks until all received
+func bufchannel_exercise1() {
+	ch := make(chan int, 3)
+
+	go func() {
+		for range cap(ch) {
+			ch <- 1
+		}
+	}()
+
+	for range cap(ch) {
+		fmt.Println(<-ch)
+	}
 }
 
 func channel_done_results(numberOfWorkers int, numberOfJobs int, channelCapacity int) {
