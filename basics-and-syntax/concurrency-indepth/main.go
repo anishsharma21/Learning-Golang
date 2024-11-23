@@ -8,7 +8,44 @@ import (
 )
 
 func main() {
-	multidirchannel_main()
+}
+
+// receive only channel sent to consumer
+func dirchannel_exercise2() {
+	ch := make(chan int)
+
+	go func() {
+		for i := 0; i < 5; i++ {
+			ch <- i+1
+		}
+		close(ch)
+	}()
+
+	dirchannel_consumer_exercise2(ch)
+}
+
+func dirchannel_consumer_exercise2(in <-chan int) {
+	for val := range in {
+		fmt.Println("Result:", val)
+	}
+}
+
+// send only channel sent to worker
+func dirchannel_exercise1() {
+	ch := make(chan int)
+
+	go dirchannel_worker_exercise1(ch)
+
+	for val := range ch {
+		fmt.Println("Result:", val)
+	}
+}
+
+func dirchannel_worker_exercise1(out chan<- int) {
+	for i := 0; i < 5; i++ {
+		out <- i+1
+	}
+	close(out)
 }
 
 //practice with directional channels and the producer-consumer pattern
