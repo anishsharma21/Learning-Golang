@@ -7,7 +7,50 @@ import (
 )
 
 func main() {
-	bufchannel_exercise2()
+	bufchannel_exercise3()
+}
+
+// producer-consumer job queue exercise
+func bufchannel_exercise3() {
+	jobsQueue := make(chan int, 3) // 3 jobs in the queue at a time
+	results := make(chan int)
+	jobsArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+	// goroutine for printing stats every 500ms
+	go func() {
+		for {
+			fmt.Println(time.Now())
+			fmt.Println("Number of jobs in jobs queue:", len(jobsQueue))
+			fmt.Println("Number of results to be processed:", len(results))
+			fmt.Println("Number of current goroutines:", runtime.NumGoroutine())
+			fmt.Println()
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
+
+	go producer_bufchannel_exercise3(jobsQueue, jobsArr)
+	for range 2 {
+		go consumer_bufchannel_exercise3(jobsQueue, results)
+	}
+
+	for range len(jobsArr) {
+		fmt.Println("Result:", <-results)
+	}
+	close(results)
+}
+
+func producer_bufchannel_exercise3(jobsQueue chan<- int, jobs []int) {
+	for _, val := range jobs {
+		jobsQueue <- val
+	}
+	close(jobsQueue)
+}
+
+func consumer_bufchannel_exercise3(jobsQueue <-chan int, results chan<- int) {
+	for job := range jobsQueue {
+		time.Sleep(time.Second)
+		results <- job * job
+	}
 }
 
 // handling buffered channel overflow
