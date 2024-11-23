@@ -8,6 +8,41 @@ import (
 )
 
 func main() {
+	pipeline()
+}
+
+// this is a super cool exercise
+// this exercise involves a 3 stage, concurrent pipeline
+func pipeline() {
+	start := time.Now()
+	values := make(chan int)
+	squares := make(chan int)
+
+	go stage1(values)
+	go stage2(values, squares)
+	stage3(squares)
+
+	fmt.Printf("Finished in %dµs\n", time.Since(start).Microseconds())
+}
+
+func stage1(out chan<- int) {
+	for i := 0; i < 1000; i++ {
+		out <- i+1
+	}
+	close(out)
+}
+
+func stage2(in <-chan int, out chan<- int) {
+	for val := range in {
+		out <- val * val
+	}
+	close(out)
+}
+
+func stage3(in <-chan int) {
+	for val := range in {
+		fmt.Println("Result:", val+1)
+	}
 }
 
 // receive only channel sent to consumer
