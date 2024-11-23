@@ -7,7 +7,57 @@ import (
 )
 
 func main() {
-	bufchannel_exercise3()
+	fmt.Println("Unbuffered channel")
+	bufchannel_exercise4(0)
+
+	fmt.Println("Buffered channel")
+	bufchannel_exercise4(10)
+
+	fmt.Println("Buffered channel")
+	bufchannel_exercise4(100)
+
+	fmt.Println("Buffered channel")
+	bufchannel_exercise4(1000)
+
+	fmt.Println("Buffered channel")
+	bufchannel_exercise4(10000)
+}
+
+// producer-consumer job queue exercise
+func bufchannel_exercise4(channelBufCap int) {
+	start := time.Now()
+	jobsQueue := make(chan int, channelBufCap)
+	results := make(chan int, channelBufCap)
+	jobsArr := make([]int, 10000)
+	for i := 0; i < 10000; i++ {
+		jobsArr[i] = i+1
+	}
+
+	go producer_bufchannel_exercise4(jobsQueue, jobsArr)
+	for i := 0; i < 10; i++ {
+		go consumer_bufchannel_exercise4(jobsQueue, results)
+	}
+
+	for i := 0; i < len(jobsArr); i++ {
+		<-results
+	}
+	close(results)
+
+	fmt.Printf("Time elapsed: %.3fs\n", time.Since(start).Seconds())
+	fmt.Printf("Time elapsed: %dµs\n", time.Since(start).Microseconds())
+}
+
+func producer_bufchannel_exercise4(jobsQueue chan<- int, jobs []int) {
+	for _, val := range jobs {
+		jobsQueue <- val
+	}
+	close(jobsQueue)
+}
+
+func consumer_bufchannel_exercise4(jobsQueue <-chan int, results chan<- int) {
+	for job := range jobsQueue {
+		results <- job * job
+	}
 }
 
 // producer-consumer job queue exercise
@@ -15,6 +65,13 @@ func bufchannel_exercise3() {
 	jobsQueue := make(chan int, 3) // 3 jobs in the queue at a time
 	results := make(chan int)
 	jobsArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+	fmt.Println(time.Now())
+	fmt.Println("Number of jobs in jobs queue:", len(jobsQueue))
+	fmt.Println("Number of results to be processed:", len(results))
+	fmt.Println("Number of current goroutines:", runtime.NumGoroutine())
+	fmt.Println()
+	time.Sleep(500 * time.Millisecond)
 
 	// goroutine for printing stats every 500ms
 	go func() {
