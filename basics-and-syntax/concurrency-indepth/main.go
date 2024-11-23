@@ -7,19 +7,72 @@ import (
 )
 
 func main() {
-	bufchannel_jobqueue()
 }
 
-func bufchannel_jobqueue() {
-	jobs := make(chan int, 3)
-	done := make(chan bool, 3)
+func channel_done_results(numberOfWorkers int, numberOfJobs int, channelCapacity int) {
+	jobs := make(chan int, channelCapacity)
+	results := make(chan int, channelCapacity)
+	done := make(chan bool, channelCapacity)
 
-	for range 3 {
+	for range numberOfWorkers {
+		go worker_bufchannel_done_results(jobs, results)
+	}
+
+	start := time.Now()
+	go func() {
+		for i := 0; i < numberOfJobs; i++ {
+			jobs <- i+1
+		}
+		close(jobs)
+	}()
+
+	go func() {
+		for result := range results {
+			fmt.Println("Job complete:", result)
+			done <- true
+		}
+		close(done)
+	}()
+
+	for i := 0; i < numberOfJobs; i++ {
+		<-done
+	}
+	close(results)
+	fmt.Printf("Time elapsed: %dµs\n", time.Since(start).Microseconds())
+}
+
+func worker_bufchannel_done_results(jobs <-chan int, results chan<- int) {
+	for job := range jobs {
+		time.Sleep(200 * time.Millisecond)
+		results <- job * job
+	}
+}
+
+// problem with the job queue below is that even if a job is complete, we can't print
+// that it is finished until all the jobs are added to the job queue because it blocks
+// so, to print when any single job is complete, we can create goroutines for that reason
+// which receive from the done channel, so 2 sets of workers (idk how good this pattern is)
+// FIX: you wrap the job creation logic in a goroutine
+func done_worker_bufchannel_jobqueue(done <-chan int) {
+	for jobDone := range done {
+		fmt.Printf("Job complete: %v\n", jobDone)
+	}
+}
+
+// this is sort of like a rate limiter where you can set the buffer for number of incoming
+// jobs at any given moment, then create as many workers as you like to handle them
+// important note: each point where channel receives or sends is potentially blocking if:
+// the buffered channel is not full, which means nothing below it runs until its done
+func bufchannel_jobqueue() {
+	jobs := make(chan int, 20)
+	done := make(chan int, 20)
+
+	for range 4 {
 		go bufchannel_jobqueue_worker(jobs, done)
 	}
 
 	start := time.Now()
-	const numjobs int = 5
+	const numjobs int = 20
 
 	for i := 0; i < numjobs; i++ {
 		jobs <- i+1
@@ -27,7 +80,7 @@ func bufchannel_jobqueue() {
 	close(jobs)
 
 	for range numjobs {
-		<-done
+		fmt.Printf("Job complete: %d\n", <-done)
 	}
 	close(done)
 
@@ -35,11 +88,11 @@ func bufchannel_jobqueue() {
 	fmt.Println("All jobs complete")
 }
 
-func bufchannel_jobqueue_worker(jobs <-chan int, done chan<- bool) {
+func bufchannel_jobqueue_worker(jobs <-chan int, done chan<- int) {
 	for job := range jobs {
 		fmt.Println("Processing job:", job)
 		time.Sleep(time.Second)
-		done <- true
+		done <- job
 	}
 }
 
