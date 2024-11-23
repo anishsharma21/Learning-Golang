@@ -2,13 +2,80 @@ package main
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"runtime"
 	"sync"
 	"time"
 )
 
 func main() {
-	pipeline()
+	dynamic_pipeline(5, 5)
+}
+
+var numberOfFinalValues int = 0
+
+func dynamic_pipeline(filterWorkerNum int, squareWorkerNum int) {
+	start := time.Now()
+
+	values := make(chan int)
+	filtered := make(chan int, 50)
+	squares := make(chan int, 50)
+
+	go produceValues(values)
+
+	var filterWg sync.WaitGroup
+	var squareWg sync.WaitGroup
+
+	filterWg.Add(filterWorkerNum)
+	for range filterWorkerNum {
+		go filterValues(values, filtered, &filterWg)
+	}
+
+	squareWg.Add(squareWorkerNum)
+	for range squareWorkerNum {
+		go squareValues(filtered, squares, &squareWg)
+	}
+
+	go func() {
+		filterWg.Wait()
+		close(filtered)
+	}()
+
+	go func() {
+		squareWg.Wait()
+		close(squares)
+	}()
+
+	for result := range squares {
+		fmt.Println("Result:", result)
+	}
+
+	fmt.Printf("Completed in %dµs\n", time.Since(start).Microseconds())
+	fmt.Printf("Number of final values: %d\n", numberOfFinalValues)
+}
+
+func produceValues(out chan<- int) {
+	for range 1000 {
+		out <- rand.IntN(100) - 50
+	}
+	close(out)
+}
+
+func filterValues(in <-chan int, out chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for val := range in {
+		if val >= 0 {
+			out <- val
+		}
+	}
+}
+
+func squareValues(in <-chan int, out chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for val := range in {
+		numberOfFinalValues++
+		out <- val * val
+	}
 }
 
 // this is a super cool exercise
